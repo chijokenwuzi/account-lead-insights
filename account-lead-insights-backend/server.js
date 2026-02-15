@@ -35,6 +35,7 @@ const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || "https://api.openai.com/v
 const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS || 30000);
 const OPENAI_ALLOW_FALLBACK = process.env.OPENAI_ALLOW_FALLBACK === "true";
 const LANDING_URL = normalizeLandingUrl(process.env.LANDING_URL);
+const FRONTEND_LANDING_URL = resolveFrontendLandingUrl(process.env.FRONTEND_LANDING_URL);
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "data");
 const STORE_PATH = path.join(DATA_DIR, "store.json");
@@ -256,6 +257,13 @@ function parseAbsoluteHttpUrl(value) {
   } catch {
     return null;
   }
+}
+
+function resolveFrontendLandingUrl(value) {
+  const fallback = "https://account-lead-insights.onrender.com/marketing";
+  const text = String(value || "").trim();
+  if (!text) return fallback;
+  return parseAbsoluteHttpUrl(text) ? text : fallback;
 }
 
 function platformKey(value) {
@@ -1076,7 +1084,8 @@ async function handleApi(req, res, pathname) {
       openAiConfigured: Boolean(OPENAI_API_KEY),
       openAiFallbackEnabled: OPENAI_ALLOW_FALLBACK,
       model: OPENAI_MODEL,
-      landingUrl: LANDING_URL
+      landingUrl: LANDING_URL,
+      frontendLandingUrl: FRONTEND_LANDING_URL
     });
   }
 

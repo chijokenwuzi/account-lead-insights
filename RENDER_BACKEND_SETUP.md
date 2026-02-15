@@ -22,6 +22,7 @@ This creates a second Render service with its own domain for the Team Ad Ops bac
 Add these in Render -> backend service -> Environment:
 - `HOST=0.0.0.0`
 - `OPENAI_API_KEY=<your key>`
+- `FRONTEND_LANDING_URL=https://account-lead-insights.onrender.com/marketing`
 - Optional: `OPENAI_MODEL=gpt-5-mini`
 
 Render provides `PORT` automatically.

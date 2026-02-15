@@ -38,6 +38,7 @@ export OPENAI_MODEL="gpt-5-mini"
 export OPENAI_TIMEOUT_MS=30000
 export OPENAI_ALLOW_FALLBACK=false
 export LANDING_URL="/landing.html"
+export FRONTEND_LANDING_URL="https://account-lead-insights.onrender.com/marketing"
 ```
 
 If `OPENAI_API_KEY` is missing and `OPENAI_ALLOW_FALLBACK=false`, campaign option generation returns an error.

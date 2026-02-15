@@ -31,6 +31,7 @@ const PLATFORM_LABEL = {
   facebook: "Facebook",
   google: "Google"
 };
+const DEFAULT_FRONTEND_LANDING_URL = "https://account-lead-insights.onrender.com/marketing";
 
 function setMessage(node, type, text) {
   if (!node) return;
@@ -185,8 +186,12 @@ function renderMetrics() {
 }
 
 function renderServiceStatus() {
-  if (backToLandingBtn && serviceHealth && serviceHealth.landingUrl) {
-    backToLandingBtn.href = String(serviceHealth.landingUrl);
+  if (backToLandingBtn) {
+    const preferredLanding =
+      serviceHealth && serviceHealth.frontendLandingUrl
+        ? String(serviceHealth.frontendLandingUrl)
+        : DEFAULT_FRONTEND_LANDING_URL;
+    backToLandingBtn.href = preferredLanding;
   }
 
   if (!openAiStatus) return;
@@ -1375,7 +1380,10 @@ if (loadCustomerDefaultsBtn) {
 if (backToLandingBtn) {
   backToLandingBtn.addEventListener("click", (event) => {
     event.preventDefault();
-    const fallback = serviceHealth && serviceHealth.landingUrl ? String(serviceHealth.landingUrl) : "/";
+    const fallback =
+      serviceHealth && serviceHealth.frontendLandingUrl
+        ? String(serviceHealth.frontendLandingUrl)
+        : DEFAULT_FRONTEND_LANDING_URL;
     window.location.href = fallback;
   });
 }
