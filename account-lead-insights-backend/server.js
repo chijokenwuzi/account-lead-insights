@@ -244,7 +244,7 @@ function normalizeText(value) {
 
 function normalizeLandingUrl(value) {
   const text = String(value || "").trim();
-  if (!text) return "/landing.html";
+  if (!text) return "/index.html";
   return text;
 }
 
@@ -1050,8 +1050,27 @@ async function serveStatic(res, pathname) {
     }
   }
 
-  const rootPage = String(LANDING_URL || "").startsWith("/") ? String(LANDING_URL) : "/landing.html";
-  const routePath = pathname === "/" ? rootPage : pathname;
+  const rootPage = String(LANDING_URL || "").startsWith("/") ? String(LANDING_URL) : "/index.html";
+  let routePath = pathname === "/" ? rootPage : pathname;
+  if (pathname === "/" && routePath === "/") {
+    routePath = "/index.html";
+  }
+
+  // If root landing is misconfigured or missing, serve workspace home instead of "Not Found".
+  if (pathname === "/" && routePath.startsWith("/")) {
+    const candidate = safePathFromUrl(routePath);
+    const candidateExists = candidate
+      ? await fs
+          .stat(candidate)
+          .then((entry) => entry.isFile())
+          .catch(() => false)
+      : false;
+
+    if (!candidateExists) {
+      routePath = "/index.html";
+    }
+  }
+
   const filePath = safePathFromUrl(routePath);
   if (!filePath) {
     sendText(res, 400, "Bad request path");
