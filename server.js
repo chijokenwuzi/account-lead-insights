@@ -1461,6 +1461,7 @@ async function serveStatic(req, res, url) {
   const pageRoutes = {
     "/": "marketing.html",
     "/marketing": "marketing.html",
+    "/free-call": "free-call.html",
     "/marketing-lead-gen": "marketing-lead-gen.html",
     "/marketing-lead-tracker": "marketing-lead-tracker.html",
     "/marketing-lead-gen/assets": "marketing-lead-gen-assets.html",

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Lead Insights | Free Call Intake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/marketing.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrap">
+        <a class="brand" href="/marketing">Account Lead Insights</a>
+        <nav class="top-nav top-nav-minimal">
+          <a class="nav-back" href="/marketing">Back</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">Free Call</p>
+        <h1>Quick Intake Form</h1>
+        <p>Share your details and our team will reach out to schedule your call.</p>
+      </section>
+
+      <section class="centered-card">
+        <article class="auth-card">
+          <form id="freeCallForm">
+            <label>
+              Name
+              <input type="text" name="name" placeholder="Alex Johnson" required />
+            </label>
+            <label>
+              Phone Number
+              <input type="tel" name="phone" placeholder="(555) 123-4567" required />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" placeholder="you@company.com" required />
+            </label>
+            <label>
+              Best Method of Communication
+              <select name="bestMethod" required>
+                <option value="">Select one</option>
+                <option value="phone">Phone Call</option>
+                <option value="text">Text Message</option>
+                <option value="email">Email</option>
+              </select>
+            </label>
+            <label>
+              When Are You Usually Available?
+              <textarea name="availability" rows="3" placeholder="Weekdays after 3pm, weekends mornings." required></textarea>
+            </label>
+            <button class="btn btn-primary" type="submit">Submit Intake</button>
+            <p id="freeCallMessage" class="message" role="status" aria-live="polite"></p>
+          </form>
+        </article>
+      </section>
+    </main>
+
+    <script src="/free-call.js"></script>
+  </body>
+</html>
