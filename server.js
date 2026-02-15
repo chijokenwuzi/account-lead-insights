@@ -1389,14 +1389,21 @@ async function serveStatic(req, res, url) {
   const pathname =
     rawPathname.length > 1 && rawPathname.endsWith("/") ? rawPathname.slice(0, -1) : rawPathname;
   const legacyBrandRedirects = {
-    "/features": "/account-lead-insights/features",
-    "/pricing": "/account-lead-insights/pricing",
-    "/stories": "/account-lead-insights/stories",
-    "/login": "/account-lead-insights/login",
-    "/get-started": "/account-lead-insights/get-started",
-    "/workspace": "/account-lead-insights/workspace",
-    "/company": "/account-lead-insights/workspace",
-    "/account-lead-insights/company": "/account-lead-insights/workspace"
+    "/features": "/marketing",
+    "/pricing": "/marketing",
+    "/stories": "/marketing",
+    "/login": "/lead-insights-login",
+    "/get-started": "/marketing-lead-gen",
+    "/workspace": "/marketing",
+    "/company": "/marketing",
+    "/account-lead-insights": "/marketing",
+    "/account-lead-insights/features": "/marketing",
+    "/account-lead-insights/pricing": "/marketing",
+    "/account-lead-insights/stories": "/marketing",
+    "/account-lead-insights/login": "/lead-insights-login",
+    "/account-lead-insights/get-started": "/marketing-lead-gen",
+    "/account-lead-insights/workspace": "/marketing",
+    "/account-lead-insights/company": "/marketing"
   };
 
   if (pathname === "/founder-backend") {
@@ -1411,18 +1418,15 @@ async function serveStatic(req, res, url) {
     return;
   }
 
-  if (pathname.startsWith("/company/")) {
-    const brandScopedPath = `/account-lead-insights${pathname}`;
-    res.writeHead(302, { Location: brandScopedPath });
+  if (pathname.startsWith("/company/") || pathname.startsWith("/account-lead-insights/company/")) {
+    res.writeHead(302, { Location: "/marketing" });
     res.end();
     return;
   }
 
   const pageRoutes = {
-    "/": "index.html",
-    "/account-lead-insights": "index.html",
+    "/": "marketing.html",
     "/marketing": "marketing.html",
-    "/account-lead-insights/features": "features.html",
     "/marketing-lead-gen": "marketing-lead-gen.html",
     "/marketing-lead-tracker": "marketing-lead-tracker.html",
     "/marketing-lead-gen/creative": "marketing-lead-gen-vsl.html",
@@ -1430,22 +1434,12 @@ async function serveStatic(req, res, url) {
     "/marketing-lead-gen/assets": "marketing-lead-gen-assets.html",
     "/marketing-lead-gen/budget": "marketing-lead-gen-budget.html",
     "/lead-insights-login": "lead-insights-login.html",
-    "/lead-insights-get-started": "lead-insights-get-started.html",
-    "/account-lead-insights/pricing": "pricing.html",
-    "/account-lead-insights/stories": "stories.html",
-    "/account-lead-insights/login": "login.html",
-    "/account-lead-insights/get-started": "get-started.html",
-    "/account-lead-insights/workspace": "workspace.html"
+    "/lead-insights-get-started": "lead-insights-get-started.html"
   };
 
   const mappedPage = pageRoutes[pathname];
-  if (
-    mappedPage ||
-    pathname === "/company" ||
-    pathname.startsWith("/company/") ||
-    pathname.startsWith("/account-lead-insights/company/")
-  ) {
-    const htmlFile = mappedPage || "workspace.html";
+  if (mappedPage) {
+    const htmlFile = mappedPage;
     const html = await fs.readFile(path.join(ROOT, htmlFile), "utf8");
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(html);
