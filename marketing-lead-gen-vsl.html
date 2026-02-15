@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Lead Insights | Lead Generation - Ad Messaging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/marketing.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrap">
+        <a class="brand" href="/marketing">Account Lead Insights</a>
+        <nav class="top-nav top-nav-minimal">
+          <a class="nav-back" href="/marketing-lead-gen">Back</a>
+          <a href="/lead-insights-login">Login</a>
+        </nav>
+        <a class="cta-pill" href="/marketing-lead-gen">Get Started</a>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">Lead Generation</p>
+        <h1>Ad Messaging Setup</h1>
+      </section>
+
+      <section class="section">
+        <div class="leadgen-shell single">
+          <article class="leadgen-card">
+            <p class="step-kicker">Step 2 of 4</p>
+            <h2>Add Creative Direction and Messaging</h2>
+            <p id="vslSummary" class="leadgen-meta"></p>
+
+            <div class="instruction-card">
+              <h3>How to prepare high-converting home service ads</h3>
+              <ol class="leadgen-list">
+                <li>Open with urgent homeowner pain (leak, no heat/AC, outage, roof damage).</li>
+                <li>Show response speed, trust signals, and warranty/guarantee.</li>
+                <li>Use one proof point: rating, review count, or before/after result.</li>
+                <li>State the offer clearly: service, price point, and service area.</li>
+                <li>Use one CTA: Call now, Book today, or Request same-day service.</li>
+              </ol>
+            </div>
+
+            <form id="vslForm" class="leadgen-form single-col">
+              <fieldset class="channel-fieldset">
+                <legend>Creative Production Choice</legend>
+                <div class="choice-stack">
+                  <label class="choice-item">
+                    <input type="radio" name="vslMode" value="upload" checked />
+                    Upload Existing Creative
+                  </label>
+                  <label class="choice-item">
+                    <input type="radio" name="vslMode" value="done-for-you" />
+                    Ask Us To Create Creative
+                  </label>
+                </div>
+              </fieldset>
+
+              <label>
+                Upload Video or Creative File (optional if using link)
+                <input id="vslFileInput" name="vslFile" type="file" accept="video/*" />
+              </label>
+
+              <label>
+                Existing Creative URL (optional)
+                <input name="vslUrl" type="url" maxlength="260" placeholder="https://www.youtube.com/watch?v=..." />
+              </label>
+
+              <label>
+                Creative Instructions / Notes
+                <textarea
+                  name="vslNotes"
+                  rows="4"
+                  maxlength="1500"
+                  placeholder="Key talking points, audience pain points, compliance notes, required CTA"
+                ></textarea>
+              </label>
+
+              <div class="funnel-actions">
+                <a class="btn btn-secondary" href="/marketing-lead-gen">Back</a>
+                <button class="btn btn-primary" type="submit">Continue to Business Assets</button>
+              </div>
+            </form>
+            <p id="vslStatus" class="message" aria-live="polite"></p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="/marketing-lead-gen-funnel-storage.js"></script>
+    <script src="/marketing-lead-gen-vsl.js"></script>
+
+  </body>
+</html>

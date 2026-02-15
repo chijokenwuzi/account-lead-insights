@@ -1,0 +1,9 @@
+{
+  "name": "account-lead-insights",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Account Lead Insights web app",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
