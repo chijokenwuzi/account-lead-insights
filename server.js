@@ -51,10 +51,24 @@ function sendText(res, statusCode, text) {
   res.end(text);
 }
 
+function isLocalRequestHost(hostHeader) {
+  const host = String(hostHeader || "").trim().toLowerCase();
+  return (
+    host === "localhost" ||
+    host.startsWith("localhost:") ||
+    host === "127.0.0.1" ||
+    host.startsWith("127.0.0.1:") ||
+    host === "0.0.0.0" ||
+    host.startsWith("0.0.0.0:") ||
+    host === "[::1]" ||
+    host.startsWith("[::1]:") ||
+    host === "::1" ||
+    host.startsWith("::1:")
+  );
+}
+
 function resolveFounderBackendUrl(req) {
-  const hostHeader = String(req.headers.host || "").trim().toLowerCase();
-  const isLocalHost = hostHeader.startsWith("127.0.0.1:") || hostHeader.startsWith("localhost:");
-  if (isLocalHost) {
+  if (isLocalRequestHost(req.headers.host)) {
     return LOCAL_FOUNDER_BACKEND_URL;
   }
   return FOUNDER_BACKEND_URL;

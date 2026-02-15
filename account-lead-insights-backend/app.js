@@ -31,7 +31,17 @@ const PLATFORM_LABEL = {
   facebook: "Facebook",
   google: "Google"
 };
-const DEFAULT_FRONTEND_LANDING_URL = "https://account-lead-insights.onrender.com/marketing";
+
+function defaultFrontendLandingUrl() {
+  const host = String(window.location.hostname || "").trim().toLowerCase();
+  const isLocalHost = host === "127.0.0.1" || host === "localhost" || host === "0.0.0.0" || host === "::1";
+  if (isLocalHost) {
+    return "http://127.0.0.1:9091/marketing";
+  }
+  return "https://account-lead-insights.onrender.com/marketing";
+}
+
+const DEFAULT_FRONTEND_LANDING_URL = defaultFrontendLandingUrl();
 
 function setMessage(node, type, text) {
   if (!node) return;

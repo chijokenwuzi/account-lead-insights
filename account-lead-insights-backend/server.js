@@ -35,7 +35,14 @@ const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || "https://api.openai.com/v
 const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS || 30000);
 const OPENAI_ALLOW_FALLBACK = process.env.OPENAI_ALLOW_FALLBACK === "true";
 const LANDING_URL = normalizeLandingUrl(process.env.LANDING_URL);
-const FRONTEND_LANDING_URL = resolveFrontendLandingUrl(process.env.FRONTEND_LANDING_URL);
+const FRONTEND_LANDING_URL = resolveFrontendLandingUrl(
+  process.env.FRONTEND_LANDING_URL,
+  "https://account-lead-insights.onrender.com/marketing"
+);
+const LOCAL_FRONTEND_LANDING_URL = resolveFrontendLandingUrl(
+  process.env.LOCAL_FRONTEND_LANDING_URL,
+  "http://127.0.0.1:9091/marketing"
+);
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "data");
 const STORE_PATH = path.join(DATA_DIR, "store.json");
@@ -259,11 +266,26 @@ function parseAbsoluteHttpUrl(value) {
   }
 }
 
-function resolveFrontendLandingUrl(value) {
-  const fallback = "https://account-lead-insights.onrender.com/marketing";
+function resolveFrontendLandingUrl(value, fallback) {
   const text = String(value || "").trim();
   if (!text) return fallback;
   return parseAbsoluteHttpUrl(text) ? text : fallback;
+}
+
+function isLocalRequestHost(hostHeader) {
+  const host = String(hostHeader || "").trim().toLowerCase();
+  return (
+    host === "localhost" ||
+    host.startsWith("localhost:") ||
+    host === "127.0.0.1" ||
+    host.startsWith("127.0.0.1:") ||
+    host === "0.0.0.0" ||
+    host.startsWith("0.0.0.0:") ||
+    host === "[::1]" ||
+    host.startsWith("[::1]:") ||
+    host === "::1" ||
+    host.startsWith("::1:")
+  );
 }
 
 function platformKey(value) {
@@ -1010,11 +1032,12 @@ function safePathFromUrl(urlPath) {
 
 async function serveStatic(res, pathname) {
   if (pathname === "/") {
+    const requestHost = String(res.req && res.req.headers ? res.req.headers.host || "" : "")
+      .trim()
+      .toLowerCase();
+    const localRequest = isLocalRequestHost(requestHost);
     const externalLanding = parseAbsoluteHttpUrl(LANDING_URL);
-    if (externalLanding) {
-      const requestHost = String(res.req && res.req.headers ? res.req.headers.host || "" : "")
-        .trim()
-        .toLowerCase();
+    if (externalLanding && !localRequest) {
       const targetHost = String(externalLanding.host || "").trim().toLowerCase();
       const targetPath = String(externalLanding.pathname || "/").trim() || "/";
       const sameHost = requestHost && requestHost === targetHost;
@@ -1078,6 +1101,9 @@ async function handleApi(req, res, pathname) {
   const store = await readStore();
 
   if (method === "GET" && pathname === "/api/health") {
+    const frontendLandingUrl = isLocalRequestHost(req && req.headers ? req.headers.host : "")
+      ? LOCAL_FRONTEND_LANDING_URL
+      : FRONTEND_LANDING_URL;
     return sendJson(res, 200, {
       ok: true,
       service: "account-lead-insights-backend-workspace",
@@ -1085,7 +1111,7 @@ async function handleApi(req, res, pathname) {
       openAiFallbackEnabled: OPENAI_ALLOW_FALLBACK,
       model: OPENAI_MODEL,
       landingUrl: LANDING_URL,
-      frontendLandingUrl: FRONTEND_LANDING_URL
+      frontendLandingUrl
     });
   }
 
