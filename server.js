@@ -14,7 +14,7 @@ const STORE_PATH = path.join(DATA_DIR, "store.json");
 const OPENAI_API_KEY = String(process.env.OPENAI_API_KEY || "").trim();
 const OPENAI_MODEL = String(process.env.OPENAI_MODEL || "gpt-4.1-mini").trim();
 const FOUNDER_BACKEND_URL = String(
-  process.env.FOUNDER_BACKEND_URL || "https://accountstory.onrender.com/index.html"
+  process.env.FOUNDER_BACKEND_URL || "https://account-lead-insights-backend.onrender.com/index.html"
 ).trim();
 const CAMPAIGN_STATUSES = new Set(["Draft", "Approved", "Queued"]);
 const LEAD_GEN_CHANNEL_DEFINITIONS = {

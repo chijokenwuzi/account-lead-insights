@@ -26,3 +26,12 @@ Then open:
 - `/account-lead-insights/workspace` -> workspace
 
 Legacy routes (like `/login`, `/workspace`, `/features`) redirect to branded `/account-lead-insights/*` routes.
+
+## Separate backend service
+
+This repo now includes a standalone backend workspace at:
+- `account-lead-insights-backend/`
+
+Deploy that folder as a second Render Web Service to get a fully separate backend domain.
+See:
+- `RENDER_BACKEND_SETUP.md`
