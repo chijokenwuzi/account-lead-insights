@@ -1452,13 +1452,17 @@ async function serveStatic(req, res, url) {
     return;
   }
 
+  if (pathname === "/marketing-lead-gen/creative" || pathname === "/marketing-lead-gen/vsl") {
+    res.writeHead(302, { Location: "/marketing-lead-gen/assets" });
+    res.end();
+    return;
+  }
+
   const pageRoutes = {
     "/": "marketing.html",
     "/marketing": "marketing.html",
     "/marketing-lead-gen": "marketing-lead-gen.html",
     "/marketing-lead-tracker": "marketing-lead-tracker.html",
-    "/marketing-lead-gen/creative": "marketing-lead-gen-vsl.html",
-    "/marketing-lead-gen/vsl": "marketing-lead-gen-vsl.html",
     "/marketing-lead-gen/assets": "marketing-lead-gen-assets.html",
     "/marketing-lead-gen/budget": "marketing-lead-gen-budget.html",
     "/lead-insights-login": "lead-insights-login.html",

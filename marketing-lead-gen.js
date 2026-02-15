@@ -138,13 +138,13 @@ leadGenForm.addEventListener("submit", (event) => {
       channelAllocations: null
     });
 
-    setStatus("success", "Saved. Continuing to creative step...");
-    window.location.href = "/marketing-lead-gen/creative";
+    setStatus("success", "Saved. Continuing to assets...");
+    window.location.href = "/marketing-lead-gen/assets";
   } catch {
     setStatus("error", "Unable to save intake. Please retry.");
     if (submitButton) {
       submitButton.disabled = false;
-      submitButton.textContent = "Continue to Creative Step";
+      submitButton.textContent = "Continue to Assets";
     }
   }
 });

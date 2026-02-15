@@ -4,13 +4,7 @@ const assetsSummary = document.getElementById("assetsSummary");
 
 const state = window.LeadGenFunnelStorage.read();
 
-if (!state.vslWorkflow) {
-  window.location.href = "/marketing-lead-gen/creative";
-}
-
-assetsSummary.textContent = `${state.businessName || "Draft intake"} · Creative mode: ${String(
-  state.vslWorkflow.mode || "upload"
-)}`;
+assetsSummary.textContent = `${state.businessName || "Draft intake"} · Add your business proof and content assets.`;
 
 function setStatus(type, text) {
   assetsStatus.textContent = text;
