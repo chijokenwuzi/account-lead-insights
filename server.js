@@ -16,6 +16,9 @@ const OPENAI_MODEL = String(process.env.OPENAI_MODEL || "gpt-4.1-mini").trim();
 const FOUNDER_BACKEND_URL = String(
   process.env.FOUNDER_BACKEND_URL || "https://account-lead-insights-backend.onrender.com/index.html"
 ).trim();
+const LOCAL_FOUNDER_BACKEND_URL = String(
+  process.env.LOCAL_FOUNDER_BACKEND_URL || "http://127.0.0.1:10000/index.html"
+).trim();
 const CAMPAIGN_STATUSES = new Set(["Draft", "Approved", "Queued"]);
 const LEAD_GEN_CHANNEL_DEFINITIONS = {
   "google-ads": { label: "Google Ads", defaultCpl: 180 },
@@ -46,6 +49,15 @@ function sendJson(res, statusCode, data) {
 function sendText(res, statusCode, text) {
   res.writeHead(statusCode, { "Content-Type": "text/plain; charset=utf-8" });
   res.end(text);
+}
+
+function resolveFounderBackendUrl(req) {
+  const hostHeader = String(req.headers.host || "").trim().toLowerCase();
+  const isLocalHost = hostHeader.startsWith("127.0.0.1:") || hostHeader.startsWith("localhost:");
+  if (isLocalHost) {
+    return LOCAL_FOUNDER_BACKEND_URL;
+  }
+  return FOUNDER_BACKEND_URL;
 }
 
 async function readJson(filePath, fallback = null) {
@@ -1409,7 +1421,7 @@ async function serveStatic(req, res, url) {
   };
 
   if (pathname === "/founder-backend") {
-    res.writeHead(302, { Location: FOUNDER_BACKEND_URL });
+    res.writeHead(302, { Location: resolveFounderBackendUrl(req) });
     res.end();
     return;
   }
