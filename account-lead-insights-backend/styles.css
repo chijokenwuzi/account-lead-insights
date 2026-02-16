@@ -541,6 +541,17 @@ select:focus {
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #8ff0b8;
+  letter-spacing: 0.02em;
 }
 
 .ad-preview {

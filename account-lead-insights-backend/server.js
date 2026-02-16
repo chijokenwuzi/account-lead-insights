@@ -345,7 +345,7 @@ function normalizePublishJob(entry) {
   const source = entry && typeof entry === "object" ? entry : {};
   const statusRaw = normalizeText(source.status) || "Ready";
   const status =
-    ["Ready", "Sent", "Failed", "Archived"].includes(statusRaw) ? statusRaw : "Ready";
+    ["Ready", "Sent", "Failed", "Unpublished", "Archived"].includes(statusRaw) ? statusRaw : "Ready";
   const platform = platformKey(source.platform);
   return {
     id: String(source.id || uid("job")),
@@ -1748,6 +1748,10 @@ async function handleApi(req, res, pathname) {
       job.status = "Failed";
       job.lastError = reason;
       appendJobLog(job, "Marked Failed", reason);
+    } else if (action === "unpublish") {
+      job.status = "Unpublished";
+      job.lastError = "";
+      appendJobLog(job, "Unpublished", "Marked unpublished by operator.");
     } else if (action === "retry") {
       job.status = "Ready";
       job.lastError = "";

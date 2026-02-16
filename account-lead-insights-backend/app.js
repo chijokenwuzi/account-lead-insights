@@ -362,27 +362,61 @@ function adEntriesForRuns(runs) {
   return entries;
 }
 
-function createQueueButtons(runId, option) {
+function latestPublishJobForOption(runId, optionId, platform) {
+  const platformId = platformKey(platform);
+  if (!platformId || !state || !Array.isArray(state.publishJobs)) return null;
+  return (
+    state.publishJobs.find((entry) => {
+      if (state.selectedCustomerId && String(entry.customerId || "") !== String(state.selectedCustomerId)) {
+        return false;
+      }
+      if (String(entry.runId || "") !== String(runId || "")) return false;
+      if (String(entry.optionId || "") !== String(optionId || "")) return false;
+      if (platformKey(entry.platform) !== platformId) return false;
+      if (String(entry.status || "").toLowerCase() === "archived") return false;
+      return true;
+    }) || null
+  );
+}
+
+function createQueueButtons(runId, option, platform) {
   const wrap = document.createElement("div");
   wrap.className = "publish-actions";
   const optionId = String(option && option.id ? option.id : "");
+  const platformId = platformKey(platform);
+  const liveJob = latestPublishJobForOption(runId, optionId, platformId);
+  const isLive = Boolean(liveJob && String(liveJob.status || "").toLowerCase() === "sent");
 
   const available = optionPlatforms(option);
   const connected = connectedPlatforms();
-  const connectedAvailable = available.filter((platform) => connected.includes(platform));
+  const canPublish =
+    Boolean(optionId) && Boolean(platformId) && available.includes(platformId) && connected.includes(platformId);
 
   const publishButton = document.createElement("button");
   publishButton.type = "button";
   publishButton.className = "btn btn-secondary btn-small";
-  publishButton.textContent = "Publish";
-  publishButton.dataset.publishAction = "queue-option";
-  publishButton.dataset.runId = runId;
-  publishButton.dataset.optionId = optionId;
-  publishButton.disabled = !connectedAvailable.length || !optionId || !available.length;
-  if (connectedAvailable.length) {
-    publishButton.title = `Will create a publish job for: ${connectedAvailable.map(platformLabel).join(", ")}`;
+  if (isLive && liveJob) {
+    publishButton.textContent = "Unpublish";
+    publishButton.dataset.publishAction = "unpublish-option";
+    publishButton.dataset.jobId = String(liveJob.id || "");
+    publishButton.disabled = !String(liveJob.id || "");
+    publishButton.title = `Unpublish ${platformLabel(platformId)} ad`;
+
+    const liveIndicator = document.createElement("span");
+    liveIndicator.className = "live-indicator";
+    liveIndicator.textContent = "● Live";
+    liveIndicator.title = `${platformLabel(platformId)} ad is live`;
+    wrap.appendChild(liveIndicator);
   } else {
-    publishButton.title = "Connect Facebook or Google first.";
+    publishButton.textContent = "Publish";
+    publishButton.dataset.publishAction = "queue-option";
+    publishButton.dataset.runId = runId;
+    publishButton.dataset.optionId = optionId;
+    publishButton.dataset.platform = platformId;
+    publishButton.disabled = !canPublish;
+    publishButton.title = canPublish
+      ? `Will create a publish job for ${platformLabel(platformId)}.`
+      : "Connect this platform first.";
   }
   wrap.appendChild(publishButton);
 
@@ -393,6 +427,7 @@ function statusClass(value) {
   const status = String(value || "").toLowerCase();
   if (status === "sent") return "ok";
   if (status === "failed") return "warn";
+  if (status === "unpublished") return "";
   if (status === "archived") return "";
   return "";
 }
@@ -440,8 +475,20 @@ function renderPublishQueue() {
 
     const actions = document.createElement("div");
     actions.className = "publish-actions";
+    const lowerStatus = String(job.status || "").toLowerCase();
 
-    if (String(job.status || "").toLowerCase() !== "sent") {
+    if (lowerStatus === "sent") {
+      const unpublishBtn = document.createElement("button");
+      unpublishBtn.type = "button";
+      unpublishBtn.className = "btn btn-secondary btn-small";
+      unpublishBtn.textContent = "Unpublish";
+      unpublishBtn.dataset.publishAction = "job-action";
+      unpublishBtn.dataset.jobId = job.id;
+      unpublishBtn.dataset.jobAction = "unpublish";
+      actions.appendChild(unpublishBtn);
+    }
+
+    if (lowerStatus !== "sent") {
       const sentBtn = document.createElement("button");
       sentBtn.type = "button";
       sentBtn.className = "btn btn-secondary btn-small";
@@ -452,7 +499,7 @@ function renderPublishQueue() {
       actions.appendChild(sentBtn);
     }
 
-    if (String(job.status || "").toLowerCase() !== "failed") {
+    if (lowerStatus !== "failed") {
       const failBtn = document.createElement("button");
       failBtn.type = "button";
       failBtn.className = "btn btn-secondary btn-small";
@@ -1217,7 +1264,7 @@ function renderAdInputRuns() {
     optionCard.appendChild(optionTitle);
     optionCard.appendChild(rationale);
     optionCard.appendChild(context);
-    optionCard.appendChild(createQueueButtons(run.id, option));
+    optionCard.appendChild(createQueueButtons(run.id, option, entry.platform));
     optionCard.appendChild(createPlatformBlock(entry.platform, entry.pack));
     optionsWrap.appendChild(optionCard);
   });
@@ -1457,10 +1504,15 @@ adInputRuns.addEventListener("click", async (event) => {
   if (publishAction) {
     const runId = String(target.dataset.runId || "");
     const optionId = String(target.dataset.optionId || "");
+    const platform = platformKey(String(target.dataset.platform || ""));
+    const jobId = String(target.dataset.jobId || "");
 
     try {
       if (publishAction === "queue-option") {
-        await queuePublish(runId, optionId, []);
+        await queuePublish(runId, optionId, platform ? [platform] : []);
+      } else if (publishAction === "unpublish-option") {
+        if (!jobId) return;
+        await runJobAction(jobId, "unpublish");
       }
     } catch (error) {
       setMessage(publishMessage, "error", error.message);
@@ -1491,16 +1543,18 @@ if (publishQueue) {
   });
 }
 
-simulateBtn.addEventListener("click", async () => {
-  try {
-    const payload = await request("/api/simulate", { method: "POST" });
-    state = payload.state;
-    renderAll();
-    setMessage(buildCampaignMessage, "success", payload.message || "Cycle complete.");
-  } catch (error) {
-    setMessage(buildCampaignMessage, "error", error.message);
-  }
-});
+if (simulateBtn) {
+  simulateBtn.addEventListener("click", async () => {
+    try {
+      const payload = await request("/api/simulate", { method: "POST" });
+      state = payload.state;
+      renderAll();
+      setMessage(buildCampaignMessage, "success", payload.message || "Cycle complete.");
+    } catch (error) {
+      setMessage(buildCampaignMessage, "error", error.message);
+    }
+  });
+}
 
 (async function init() {
   try {
