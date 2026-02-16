@@ -10,6 +10,7 @@ const CHANNEL_CPL = {
   "local-services-ads": 95,
   seo: 95
 };
+const shouldStartFresh = new URLSearchParams(window.location.search).get("fresh") === "1";
 
 function money(value) {
   const numeric = Number(value || 0);
@@ -108,6 +109,9 @@ Array.from(leadGenForm.querySelectorAll('input[name="channels"]')).forEach((chec
 });
 
 budgetSlider.addEventListener("input", updateBudgetPreview);
+if (shouldStartFresh) {
+  window.LeadGenFunnelStorage.clear();
+}
 hydrateFromState();
 
 leadGenForm.addEventListener("submit", (event) => {
