@@ -31,6 +31,23 @@ const PLATFORM_LABEL = {
   facebook: "Facebook",
   google: "Google"
 };
+const PREVIEW_IMAGE_STOP_WORDS = new Set([
+  "about",
+  "after",
+  "campaign",
+  "click",
+  "free",
+  "from",
+  "home",
+  "learn",
+  "more",
+  "offer",
+  "service",
+  "services",
+  "that",
+  "this",
+  "your"
+]);
 
 function defaultFrontendLandingUrl() {
   const host = String(window.location.hostname || "").trim().toLowerCase();
@@ -965,6 +982,71 @@ function buildPackFromInputs(platform, sourcePack, grid) {
   return pack;
 }
 
+function fallbackSeedFromPack(pack) {
+  const seed = String(pack.campaignName || pack.headline || pack.adSetAudience || "leadgen")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .slice(0, 32);
+  return seed || "leadgen";
+}
+
+function previewImageTagsFromPack(pack) {
+  const rawText = [
+    pack.campaignName,
+    pack.headline,
+    pack.primaryText,
+    pack.description,
+    pack.adSetAudience
+  ]
+    .map((value) => String(value || "").toLowerCase())
+    .join(" ");
+
+  const words = rawText
+    .split(/[^a-z0-9]+/g)
+    .map((word) => word.trim())
+    .filter((word) => word.length >= 4 && !PREVIEW_IMAGE_STOP_WORDS.has(word));
+
+  const unique = [];
+  words.forEach((word) => {
+    if (!unique.includes(word)) {
+      unique.push(word);
+    }
+  });
+
+  if (!unique.length) {
+    return ["business", "teamwork", "success"];
+  }
+  return unique.slice(0, 4);
+}
+
+function buildRelatedPreviewImageUrl(pack) {
+  const tags = previewImageTagsFromPack(pack).join(",");
+  const lock = fallbackSeedFromPack(pack);
+  return `https://loremflickr.com/960/540/${tags}?lock=${lock}`;
+}
+
+function createFallbackPreviewImage(media, pack) {
+  const image = document.createElement("img");
+  image.alt = "Suggested ad image preview";
+  image.loading = "lazy";
+
+  const seed = fallbackSeedFromPack(pack);
+  const backupUrl = `https://picsum.photos/seed/${seed}/960/540`;
+  let attemptedBackup = false;
+
+  image.addEventListener("error", () => {
+    if (!attemptedBackup) {
+      attemptedBackup = true;
+      image.src = backupUrl;
+      return;
+    }
+    media.textContent = "Image preview unavailable";
+  });
+
+  image.src = buildRelatedPreviewImageUrl(pack);
+  media.appendChild(image);
+}
+
 function createFacebookPreview(pack) {
   const preview = document.createElement("section");
   preview.className = "ad-preview facebook-preview";
@@ -1017,7 +1099,7 @@ function createFacebookPreview(pack) {
       media.appendChild(image);
     }
   } else {
-    media.textContent = creativeType === "video" ? "Video placeholder" : "Image placeholder";
+    createFallbackPreviewImage(media, pack);
   }
 
   const bottom = document.createElement("div");
