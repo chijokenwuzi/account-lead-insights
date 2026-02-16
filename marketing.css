@@ -970,6 +970,16 @@ button.btn-solid:focus-visible {
   color: var(--muted);
 }
 
+.flow-step-card-static {
+  transition: none;
+}
+
+.flow-step-card-static:hover,
+.flow-step-card-static:focus-visible {
+  border-color: #334a73;
+  transform: none;
+}
+
 @media (max-width: 980px) {
   .nav-wrap {
     grid-template-columns: 1fr;
