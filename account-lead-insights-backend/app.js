@@ -36,12 +36,26 @@ function defaultFrontendLandingUrl() {
   const host = String(window.location.hostname || "").trim().toLowerCase();
   const isLocalHost = host === "127.0.0.1" || host === "localhost" || host === "0.0.0.0" || host === "::1";
   if (isLocalHost) {
-    return "http://127.0.0.1:9091/marketing";
+    return "http://127.0.0.1:8080/marketing";
   }
   return "https://account-lead-insights.onrender.com/marketing";
 }
 
-const DEFAULT_FRONTEND_LANDING_URL = defaultFrontendLandingUrl();
+function sanitizeLandingTarget(url) {
+  const candidate = String(url || "").trim();
+  if (!candidate) return "";
+
+  const host = String(window.location.hostname || "").trim().toLowerCase();
+  const accountLeadInsightsBackendHost = host.includes("account-lead-insights-backend");
+  if (accountLeadInsightsBackendHost && /accountstory/i.test(candidate)) {
+    return "https://account-lead-insights.onrender.com/marketing";
+  }
+
+  return candidate;
+}
+
+const DEFAULT_FRONTEND_LANDING_URL =
+  sanitizeLandingTarget(defaultFrontendLandingUrl()) || "https://account-lead-insights.onrender.com/marketing";
 
 function setMessage(node, type, text) {
   if (!node) return;
@@ -197,10 +211,11 @@ function renderMetrics() {
 
 function renderServiceStatus() {
   if (backToLandingBtn) {
-    const preferredLanding =
+    const healthLanding =
       serviceHealth && serviceHealth.frontendLandingUrl
-        ? String(serviceHealth.frontendLandingUrl)
-        : DEFAULT_FRONTEND_LANDING_URL;
+        ? sanitizeLandingTarget(String(serviceHealth.frontendLandingUrl))
+        : "";
+    const preferredLanding = healthLanding || DEFAULT_FRONTEND_LANDING_URL || "/go-landing";
     backToLandingBtn.href = preferredLanding;
   }
 
@@ -1384,17 +1399,6 @@ if (loadCustomerDefaultsBtn) {
     applyCustomerDefaults(true);
     renderCustomerDefaultsHint();
     setMessage(buildCampaignMessage, "success", "Customer defaults loaded into campaign builder.");
-  });
-}
-
-if (backToLandingBtn) {
-  backToLandingBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    const fallback =
-      serviceHealth && serviceHealth.frontendLandingUrl
-        ? String(serviceHealth.frontendLandingUrl)
-        : DEFAULT_FRONTEND_LANDING_URL;
-    window.location.href = fallback;
   });
 }
 

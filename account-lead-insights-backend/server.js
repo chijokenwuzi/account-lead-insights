@@ -41,7 +41,7 @@ const FRONTEND_LANDING_URL = resolveFrontendLandingUrl(
 );
 const LOCAL_FRONTEND_LANDING_URL = resolveFrontendLandingUrl(
   process.env.LOCAL_FRONTEND_LANDING_URL,
-  "http://127.0.0.1:9091/marketing"
+  "http://127.0.0.1:8080/marketing"
 );
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "data");
@@ -1031,10 +1031,18 @@ function safePathFromUrl(urlPath) {
 }
 
 async function serveStatic(res, pathname) {
+  const requestHost = String(res.req && res.req.headers ? res.req.headers.host || "" : "")
+    .trim()
+    .toLowerCase();
+
+  if (pathname === "/go-landing") {
+    const target = isLocalRequestHost(requestHost) ? LOCAL_FRONTEND_LANDING_URL : FRONTEND_LANDING_URL;
+    res.writeHead(302, { Location: target });
+    res.end();
+    return;
+  }
+
   if (pathname === "/") {
-    const requestHost = String(res.req && res.req.headers ? res.req.headers.host || "" : "")
-      .trim()
-      .toLowerCase();
     const localRequest = isLocalRequestHost(requestHost);
     const externalLanding = parseAbsoluteHttpUrl(LANDING_URL);
     if (externalLanding && !localRequest) {
